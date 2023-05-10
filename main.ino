@@ -102,6 +102,8 @@ volatile unsigned char *myTIMSK1 = (unsigned char *) 0x6F;
 volatile unsigned int  *myTCNT1  = (unsigned  int *) 0x84;
 volatile unsigned char *myTIFR1 =  (unsigned char *) 0x36;
 
+
+
 ISR(TIMER1_OVF_vect) {//interupt for water level
   // Disable Timer1 interrupt
   myTIMSK1 &= ~(1 << TOIE1);
@@ -146,3 +148,83 @@ void setup() {
   lcd.clear();
         lcd.print("Disabled"); 
 }
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  // delay(1000);
+  // port_b WRITE_HIGH(0);
+  // delay(5);
+  // if (pin_b BIT_IS_HIGH(0)) {
+  //   Serial.println("high rn");
+  // }
+  // else {
+  //   Serial.println("low rn");
+  // }
+  // delay(1000);
+  // port_b WRITE_LOW(0);
+  // delay(5);
+  // if (pin_b BIT_IS_HIGH(0)) {
+  //   Serial.println("high rn");
+  // }
+  // else {
+  //   Serial.println("low rn");
+  // }
+  int chk = DHT.read11(50);
+  // Serial.print("Temperature = ");
+  // Serial.println(DHT.temperature);
+  // Serial.print("Humidity = ");
+  // Serial.println(DHT.humidity);
+
+rtc.refresh();
+
+  // Serial.print("Current Date & Time: ");
+  // Serial.print(rtc.year());
+  // Serial.print('/');
+  // Serial.print(rtc.month());
+  // Serial.print('/');
+  // Serial.print(rtc.day());
+  buttonCurrentlyPressed = *pin_b BIT_IS_HIGH(1);
+  // handle the button to swap enable state
+  if (buttonCurrentlyPressed) {
+    if (!buttonWasJustPressed) {
+      // swap state
+      buttonWasJustPressed = 1;
+      enabled = !enabled;
+      // modify light and display
+      if (enabled) {
+        *port_b WRITE_HIGH(0);
+        *port_b WRITE_LOW(4);
+      }
+      else {
+        *port_b WRITE_LOW(0);
+        *port_b WRITE_HIGH(4);
+        lcd.clear();
+        lcd.print("Disabled");
+      }
+
+unsigned int adc_read(unsigned char channel)
+{                                     //Does AD conversion and returns the analog data read from the analog channel given as a parameter.
+  *AD_CSRA = 0xC0;     //check out manual for reason why          
+  *AD_CSRB = 0;                       //Leave ACME, MUX5, and ADTS[2:0] all low.  Converter will free run and should convert when enable and start convert are set
+  *AD_MUX = B01000000 | channel;  //This selects external reference, and Channel 3 as input to convert.
+  *AD_CSRA |= B11000000;              //Enable ADC and select prescaler division factor 2
+  delay (10);
+
+//Set start convert bit high to start the conversion, then read it to see when it goes low.  That will happen when conversion is compleete   
+  *AD_CSRA |= 1 << ADSC_6;    //Set bit 6 high to start conversion
+  delay (100);
+  while (*AD_CSRA & ADSC_6){          //Goes low automatically when conversion is done
+    //Serial.println(*AD_CSRA,BIN);   //Wait until bit 6 goes back low.  That tells us the conversion is complete and we can read value
+  }
+  return (*AD_CL | *AD_CH << 8);  //Read low byte, then high byte and move high byte to upper 8 bits.  We only care about 10 bits                           
+}
+
+void getWaterLevel()
+{
+  ADC_result = adc_read(adc_channel);   //Get the ADC value
+  volatile float ADC_result_float = float(ADC_result); //Should convert back to voltage
+  //Serial.println(ADC_result_float, 6);
+  waterLevel = analogRead(A0);
+  Serial.println(waterLevel);
+}
+
