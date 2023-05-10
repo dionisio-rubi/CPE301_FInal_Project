@@ -271,6 +271,17 @@ void displayFanTurnedOn(){
   lcd.print(":");
   lcd.print(rtc.minute());
 }
+bool isTempLowEnough(float temp) {
+  // return temp <= MAX_TEMP;
+  return temp <= MAX_HUMID;
+}
+void turnFanOn() {
+  // *port_k WRITE_HIGH(3);
+    *port_b WRITE_HIGH(5);
+}
+void turnFanOff() {
+  *port_b WRITE_LOW(5);
+}
 
 unsigned int adc_read(unsigned char channel)
 {                                     //Does AD conversion and returns the analog data read from the analog channel given as a parameter.
