@@ -282,6 +282,25 @@ void turnFanOn() {
 void turnFanOff() {
   *port_b WRITE_LOW(5);
 }
+void U0init(unsigned long U0baud)
+{
+  unsigned long FCPU = 16000000;        // define CPU clock frequency
+  unsigned int tbaud;
+  tbaud = (FCPU / 16 / U0baud - 1);     // calculate USART0 baud rate register value
+  *myUCSR0A = 0x20;                     // enable double transmission speed
+  *myUCSR0B = 0x18;                     // enable receiver and transmitter
+  *myUCSR0C = 0x06;                     // set asynchronous mode, no parity, 8 data bits, 1 stop bit
+  myUBRR0  = tbaud;                    // set USART0 baud rate
+}
+
+unsigned char U0kbhit(){returnmyUCSR0A & RDA;}// return Receive Data Available flag status
+unsigned char U0getchar(){return myUDR0;}// read USART0 data registe
+void checkBuffer(){while((myUCSR0A & TBE)==0) {};}// wait for Transmit Buffer Empty flag
+void U0putchar(unsigned char U0pdata)
+{
+    checkBuffer();//UDREn (denoted in checkBuffer as the constant TBE) is a flag bit set when the buffer is empty
+    *myUDR0 = U0pdata;// and therefore ready to be written to. It's read-only.
+}
 
 unsigned int adc_read(unsigned char channel)
 {                                     //Does AD conversion and returns the analog data read from the analog channel given as a parameter.
