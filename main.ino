@@ -102,3 +102,47 @@ volatile unsigned char *myTIMSK1 = (unsigned char *) 0x6F;
 volatile unsigned int  *myTCNT1  = (unsigned  int *) 0x84;
 volatile unsigned char *myTIFR1 =  (unsigned char *) 0x36;
 
+ISR(TIMER1_OVF_vect) {//interupt for water level
+  // Disable Timer1 interrupt
+  myTIMSK1 &= ~(1 << TOIE1);
+
+  // Check if PB2 is low
+  if (!(port_b & (1 << PB2))) {
+
+  }
+
+  // Clear Timer1 overflow flag
+  *myTIFR1 |= (1 << TOV1);
+
+  // Enable Timer1 interrupt
+  myTIMSK1 |= (1 << TOIE1);
+}
+
+
+
+
+
+void setup() {
+  U0init(9600);
+  // put your setup code here, to run once:
+  // Serial.begin(9600);
+  //output for fan, analog pin 11
+  //ddr_k WRITE_HIGH(3);
+  //set PB0 to OUTPUT; ENABLED LED
+  *ddr_b WRITE_HIGH(0);
+  //set PB1 to INPUT; ENABLED BUTTON
+  *ddr_b WRITE_LOW(1);
+  //set PB3 to INPUT; HUMIDITY/TEMP SENSOR
+  *ddr_b WRITE_LOW(2);
+  *ddr_b WRITE_LOW(3);
+  lcd.begin(16,2);
+  *ddr_b WRITE_HIGH(4);//pin 10
+  //set PB6 to OUTPUT; ENABLED LED
+  ddr_b WRITE_HIGH(5);
+  //port_b WRITE_HIGH(5);
+  // *port_b WRITE_LOW(5);
+  URTCLIB_WIRE.begin();
+
+  lcd.clear();
+        lcd.print("Disabled"); 
+}
