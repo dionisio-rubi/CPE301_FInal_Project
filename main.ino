@@ -201,6 +201,50 @@ rtc.refresh();
         lcd.clear();
         lcd.print("Disabled");
       }
+      }
+  }
+  else {
+    buttonWasJustPressed = 0;
+  }
+  if (enabled) {
+    if (correctDisplayInt == 0) {
+      displayTempAndHumidity(DHT.temperature, DHT.humidity);
+      correctDisplayInt = 30;
+    } else {correctDisplayInt -= 1;}
+    // 
+    // println(DHT.temperature);
+    // if (!isTempLowEnough(DHT.temperature)) {
+    if (!isTempLowEnough(DHT.humidity)) {
+      enableFan = 1;
+      if (!fanJustTurnedOn) {
+        port_b WRITE_LOW(0);
+        //need boolean here to double check possibly. 
+        // if (enableFan){turnFanOn();Serial.println("fan has been turned on\n");}
+        //port_b WRITE_LOW(4);
+        turnFanOn();
+        // Serial.println("fan has been turned on\n");
+        displayFanTurnedOn();
+        displayFanInt = 50;
+        fanJustTurnedOn = 1;
+      }
+
+    } //if its cold
+    else {
+      enableFan = 0;
+      // Serial.println("fan has been turned off\n");
+      port_b WRITE_HIGH(0);
+      fanJustTurnedOn = 0;
+      turnFanOff();
+    }
+    if(displayFanInt > 0) {displayFanInt -= 1; displayFanTurnedOn();}
+  }
+  else {
+    correctDisplayInt = 0;
+    displayFanInt = 0;
+    turnFanOff();
+    fanJustTurnedOn = 0;
+  }
+}
 
 unsigned int adc_read(unsigned char channel)
 {                                     //Does AD conversion and returns the analog data read from the analog channel given as a parameter.
