@@ -245,6 +245,32 @@ rtc.refresh();
     fanJustTurnedOn = 0;
   }
 }
+void displayTempAndHumidity(float temp, float humidity) {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  // char tempstr = "Temp: " + str()
+  lcd.print("Temp.: ");
+  lcd.print(temp);
+  lcd.print(" C");
+  lcd.setCursor(0, 1);
+  lcd.print("Hum.: ");
+  lcd.print(humidity);
+  lcd.print("%");
+}
+void displayFanTurnedOn(){
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Fan on! ");
+  lcd.print(rtc.month());
+  lcd.print("/");
+  lcd.print(rtc.day());
+  lcd.print("/");
+  lcd.print(rtc.year());
+  lcd.setCursor(0, 1);
+  lcd.print(rtc.hour());
+  lcd.print(":");
+  lcd.print(rtc.minute());
+}
 
 unsigned int adc_read(unsigned char channel)
 {                                     //Does AD conversion and returns the analog data read from the analog channel given as a parameter.
